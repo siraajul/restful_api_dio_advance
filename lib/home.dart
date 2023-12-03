@@ -56,11 +56,14 @@ class HomeScreen extends StatelessWidget {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            return Column(
-              children: [
-                Text('${userData!.firstName}'),
-                Text('${userData!.lastName}'),
-              ],
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('${userData!.firstName}'),
+                  Text('${userData!.lastName}'),
+                ],
+              ),
             );
           }
         },
