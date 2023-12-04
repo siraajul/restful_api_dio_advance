@@ -6,10 +6,11 @@ import 'http_service.dart';
 class UserService {
 
   var apiEndpoint = 'https://reqres.in/api';
-  Future<HttpResponse> getUserList({
+
+  Future<HttpResponse> getItemList({
     int currentPage = 1,
   }) async {
-    final url = '$apiEndpoint/users';
+    final url = '$apiEndpoint/users?delay=3';
     final params = {
       'page': currentPage,
     };
@@ -25,26 +26,28 @@ class UserService {
       String userId,
       ) async {
     final url =
-        '$apiEndpoint/users/$userId';
+        '$apiEndpoint/users?delay=3/$userId';
 
     final response = await HttpService.get(url);
 
     return response;
   }
 
-  // Future<HttpResponse> updateUser(
-  //     User addressInfo,
-  //     ) async {
-  //   final url =
-  //       '';
-  //   final payload = {
-  //
-  //   };
-  //
-  //   final response = await HttpService.post(url, body: payload);
-  //
-  //   return response;
-  // }
+  Future<HttpResponse> createUser(
+     String name,
+      String job,
+      ) async {
+    final url =
+        '$apiEndpoint/users';
+    final payload = {
+    "name": name,
+    "job": job,
+    };
+
+    final response = await HttpService.post(url, body: payload);
+
+    return response;
+  }
 
   // Future<HttpResponse> deleteUser(String addressId) async {
   //   final url =

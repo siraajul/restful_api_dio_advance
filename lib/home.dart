@@ -1,100 +1,141 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:restful_api/services/user_service.dart';
-
 import 'models/user.dart';
+import 'UserDetailsPage.dart'; // Import the UserDetailsPage
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  HomeScreen({Key? key}) : super(key: key);
 
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   UserService userService = UserService();
+  late Future<List<Data>> _userListFuture;
+  bool isLoading= false;
 
-  List<Data> userList = [];
-  Data? userData;
+  @override
+  void initState() {
+    super.initState();
+    _userListFuture = getUserList();
+  }
 
   Future<List<Data>> getUserList() async {
-    final response = await userService.getUserList(
-      currentPage: 2,
-    );
+    isLoading = true;
+    setState(() {
+
+    });
+    final response = await userService.getItemList(currentPage: 1);
 
     if (response != null) {
       final payLoad = jsonDecode(response.payload);
       final List list = payLoad['data'];
-      userList = list.map((item) => Data.fromJson(item)).toList();
+      return list.map((item) => Data.fromJson(item)).toList();
     }
+    isLoading = false;
+    setState(() {
 
-    return userList;
+    });
+
+    return []; // Return an empty list if response is null
   }
 
-  Future<Data> getUserById() async {
-    final response = await userService.getUserById(
-      '3',
-    );
+  Future<Data?> getUserById(String userId) async {
+    final response = await userService.getUserById(userId);
 
     if (response != null) {
       final payLoad = jsonDecode(response.payload);
       final user = payLoad['data'];
-      userData = Data.fromJson(user);
+      return Data.fromJson(user);
     }
-
-    return userData!;
+    return null; // Handle case when response is null
   }
 
   @override
   Widget build(BuildContext context) {
-    getUserById();
-
     return Scaffold(
+
       appBar: AppBar(
+
         title: const Text('R E S T API - D I O'),
         centerTitle: true,
       ),
-      body: FutureBuilder<Data>(
-        future: getUserById(), // async work
-        builder: (BuildContext context, AsyncSnapshot<Data> snapshot) {
-          if (!snapshot.hasData) {
+      body:
+
+
+
+
+      FutureBuilder<List<Data>>(
+        future: _userListFuture,
+        builder: (BuildContext context, AsyncSnapshot<List<Data>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Error fetching or no data found!'));
           } else {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('${userData!.firstName}'),
-                  Text('${userData!.lastName}'),
-                ],
-              ),
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                  child: Card(
+                    child: ListTile(
+                      onTap: () async {
+                        Data? userDetails = await getUserById(snapshot.data![index].id.toString());
+                        if (userDetails != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UserDetailsPage(user: userDetails),
+                            ),
+                          );
+                        } else {
+                          // Handle when user details are null
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('User details not available')),
+                          );
+                        }
+                      },
+                      title: Text(
+                        '${snapshot.data![index].firstName!}',
+                      ),
+                      subtitle:  Text(
+                        '${snapshot.data![index].email!}',
+                      ),
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(snapshot.data![index].avatar!),
+                      ),
+                    ),
+                  ),
+                );
+              },
             );
           }
         },
       ),
+
+
+      // floatingActionButton: ElevatedButton( // Adding the ElevatedButton
+      //   onPressed: () async {
+      //     Data? userDetails = await getUserById('3'); // Change user ID here
+      //     if (userDetails != null) {
+      //       Navigator.push(
+      //         context,
+      //         MaterialPageRoute(
+      //           builder: (context) => UserDetailsPage(user: userDetails),
+      //         ),
+      //       );
+      //     } else {
+      //       // Handle when user details are null
+      //       ScaffoldMessenger.of(context).showSnackBar(
+      //         SnackBar(content: Text('User details not available')),
+      //       );
+      //     }
+      //   },
+      //   child: Text('Fetch User 1 Details'), // Button text
+      // ),
     );
   }
 }
-
-// list of user
-// future: getUserList(),
-
-// ------------------------
-// return ListView.builder(
-// shrinkWrap: true,
-// itemCount: userList.length,
-// itemBuilder: (context, index) {
-// return Padding(
-// padding: const EdgeInsets.symmetric(
-// vertical: 1, horizontal: 4),
-// child: Card(
-// child: ListTile(
-// onTap: () {
-// print(userList[index].id);
-// },
-// title: Text(
-// '${userList[index].firstName} ${userList[index].lastName}'),
-// leading: CircleAvatar(
-// backgroundImage:
-// NetworkImage(userList[index].avatar!),
-// ),
-// ),
-// ),
-// );
-// })

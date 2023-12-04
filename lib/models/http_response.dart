@@ -1,5 +1,3 @@
-
-
 import 'error_info.dart';
 
 class HttpResponse {

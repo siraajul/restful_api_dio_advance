@@ -1,4 +1,4 @@
-class User {
+class user {
   int? page;
   int? perPage;
   int? total;
@@ -6,7 +6,7 @@ class User {
   List<Data>? data;
   Support? support;
 
-  User(
+  user(
       {this.page,
         this.perPage,
         this.total,
@@ -14,7 +14,7 @@ class User {
         this.data,
         this.support});
 
-  User.fromJson(Map<String, dynamic> json) {
+  user.fromJson(Map<String, dynamic> json) {
     page = json['page'];
     perPage = json['per_page'];
     total = json['total'];
@@ -26,11 +26,11 @@ class User {
       });
     }
     support =
-    json['support'] != null ?  Support.fromJson(json['support']) : null;
+    json['support'] != null ? Support.fromJson(json['support']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final data =  <String, dynamic>{};
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['page'] = page;
     data['per_page'] = perPage;
     data['total'] = total;
@@ -63,7 +63,7 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final data =  <String, dynamic>{};
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['email'] = email;
     data['first_name'] = firstName;
@@ -85,9 +85,55 @@ class Support {
   }
 
   Map<String, dynamic> toJson() {
-    final data =  <String, dynamic>{};
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['url'] = url;
     data['text'] = text;
+    return data;
+  }
+}
+class Person {
+  String? name;
+  String? job;
+  String? id;
+  String? createdAt;
+
+  Person({this.name, this.job, this.id, this.createdAt});
+
+  Person.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    job = json['job'];
+    id = json['id'];
+    createdAt = json['createdAt'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['name'] = name;
+    data['job'] = job;
+    data['id'] = id;
+    data['createdAt'] = createdAt;
+    return data;
+  }
+}
+
+class PersonUpdate {
+  String? name;
+  String? job;
+  String? updatedAt;
+
+  PersonUpdate({this.name, this.job, this.updatedAt});
+
+  PersonUpdate.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    job = json['job'];
+    updatedAt = json['updatedAt'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['name'] = name;
+    data['job'] = job;
+    data['updatedAt'] = updatedAt;
     return data;
   }
 }
