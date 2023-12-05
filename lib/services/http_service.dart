@@ -12,8 +12,8 @@ class HttpService {
   static Dio dio = Dio(baseOptions)..interceptors.add(CustomInterceptors());
 
   static Map<String, dynamic> commonHeader() => {
-        'Accept-Language': 'En',
-        'Authorization': '12345678',
+      /*  'Accept-Language': 'En',
+        'Authorization': '12345678',*/
       };
 
   static Map<String, dynamic> getHeaders(Map<String, dynamic>? headers) {
@@ -156,6 +156,7 @@ class HttpService {
     Map<String, dynamic>? pathKeys,
     String contentType = ContentType.json,
   }) async {
+
     // ignore: parameter_assignments
     url = UrlHelper.generatePathKeyUrl(url, pathKeys);
     try {
@@ -170,8 +171,10 @@ class HttpService {
         ),
       );
 
+
       return generateResponse(response);
     } on DioError catch (ex) {
+
       return generateDioErrorResponse(ex.message!);
     }
   }

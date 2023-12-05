@@ -14,7 +14,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   UserService userService = UserService();
   late Future<List<Data>> _userListFuture;
-  bool isLoading= false;
+  bool isLoading = false;
+
+  List<Data> userListData = [];
 
   @override
   void initState() {
@@ -24,10 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Data>> getUserList() async {
     isLoading = true;
-    setState(() {
-
-    });
-    final response = await userService.getItemList(currentPage: 1);
+    setState(() {});
+    final response = await userService.getItemList(currentPage: 2);
 
     if (response != null) {
       final payLoad = jsonDecode(response.payload);
@@ -35,11 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return list.map((item) => Data.fromJson(item)).toList();
     }
     isLoading = false;
-    setState(() {
+    setState(() {});
 
-    });
-
-    return []; // Return an empty list if response is null
+    return [];
   }
 
   Future<Data?> getUserById(String userId) async {
@@ -50,64 +48,89 @@ class _HomeScreenState extends State<HomeScreen> {
       final user = payLoad['data'];
       return Data.fromJson(user);
     }
-    return null; // Handle case when response is null
+    return null;
+  }
+
+  Future deleteUser(String userId) async {
+    try {
+      userListData.removeWhere((element) => element.id.toString() == userId);
+      print(userListData.length);
+      setState(() {});
+
+      final response = await userService.deleteUser(userId);
+      if (response.statusCode == 200) {
+        return 'Deletion successful';
+      } else {
+        print('not Success');
+      }
+    } catch (error) {
+      print(error);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-
-        title: const Text('R E S T API - D I O'),
+        title: const Text('R E S T API - D I OS'),
         centerTitle: true,
       ),
-      body:
-
-
-
-
-      FutureBuilder<List<Data>>(
+      body: FutureBuilder<List<Data>>(
         future: _userListFuture,
         builder: (BuildContext context, AsyncSnapshot<List<Data>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Error fetching or no data found!'));
+          } else if (snapshot.hasError ||
+              !snapshot.hasData ||
+              snapshot.data!.isEmpty) {
+            return const Center(
+                child: Text('Error fetching or no data found!'));
           } else {
+            userListData = snapshot.data!;
+
             return ListView.builder(
-              itemCount: snapshot.data!.length,
+              itemCount: userListData.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
                   child: Card(
                     child: ListTile(
-                      onTap: () async {
-                        Data? userDetails = await getUserById(snapshot.data![index].id.toString());
-                        if (userDetails != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UserDetailsPage(user: userDetails),
-                            ),
-                          );
-                        } else {
-                          // Handle when user details are null
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('User details not available')),
-                          );
-                        }
-                      },
-                      title: Text(
-                        '${snapshot.data![index].firstName!}',
-                      ),
-                      subtitle:  Text(
-                        '${snapshot.data![index].email!}',
-                      ),
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(snapshot.data![index].avatar!),
-                      ),
-                    ),
+                        onTap: () async {
+                          Data? userDetails = await getUserById(
+                              userListData[index].id.toString());
+                          if (userDetails != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    UserDetailsPage(user: userDetails),
+                              ),
+                            );
+                          } else {
+                            // Handle when user details are null
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('User details not available')),
+                            );
+                          }
+                        },
+                        leading: CircleAvatar(
+                          backgroundImage:
+                              NetworkImage(userListData[index].avatar!),
+                        ),
+                        title: Text(
+                          '${userListData[index].firstName!}',
+                        ),
+                        subtitle: Text(
+                          '${userListData[index].email!}',
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            deleteUser(userListData[index].id.toString());
+                          },
+                          icon: const Icon(Icons.delete),
+                        )),
                   ),
                 );
               },
@@ -115,7 +138,6 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
-
 
       // floatingActionButton: ElevatedButton( // Adding the ElevatedButton
       //   onPressed: () async {

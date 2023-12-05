@@ -1,6 +1,6 @@
+import 'dart:async';
+import 'dart:core';
 import 'package:restful_api/models/index.dart';
-
-import '../models/user.dart';
 import 'http_service.dart';
 
 class UserService {
@@ -26,7 +26,7 @@ class UserService {
       String userId,
       ) async {
     final url =
-        '$apiEndpoint/users?delay=3/$userId';
+        '$apiEndpoint/users$userId';
 
     final response = await HttpService.get(url);
 
@@ -49,14 +49,28 @@ class UserService {
     return response;
   }
 
-  // Future<HttpResponse> deleteUser(String addressId) async {
-  //   final url =
-  //       '';
-  //   final params = {
-  //     'addressID': addressId,
-  //   };
-  //   final response = await HttpService.delete(url, queryParameters: params);
-  //
-  //   return response;
-  // }
+  Future<HttpResponse> updateUser(
+      String name,
+      String job,
+      String userId
+      ) async {
+    final url =
+        '$apiEndpoint/users/$userId';
+    final payload = {
+      "name": name,
+      "job": job,
+    };
+
+    final response = await HttpService.post(url, body: payload);
+
+    return response;
+  }
+
+  Future<HttpResponse> deleteUser(String userId) async {
+    final url =
+        '$apiEndpoint/users/$userId';
+    final response = await HttpService.delete(url);
+
+    return response;
+  }
 }
